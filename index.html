@@ -4641,17 +4641,37 @@ function openToday() {
 
 }
 
-// 予想実績データをバックグラウンドで先読み
+```javascript
+// 指定した月の予想実績データを取得
 let resultsPrefetchPromise = null;
+let resultsLoadedMonth = '';
 
-function prefetchResults() {
+function prefetchResults(targetMonth) {
 
-  if (resultsPrefetchPromise) {
-    return resultsPrefetchPromise;
+  // 同じ月のデータが取得済みなら再利用
+  if (
+    resultsLoadedMonth === targetMonth &&
+    window.resultsPrefetched === true
+  ) {
+    return Promise.resolve({
+      success: true,
+      results: window.resultsData || [],
+      hitRaces: window.hitRacesData || []
+    });
   }
 
-  resultsPrefetchPromise = fetch(
-    GAS_API_URL + '?mode=results',
+  // 同じ月の取得が進行中なら、その処理を再利用
+  if (
+    resultsPrefetchPromise &&
+    resultsPrefetchPromise.month === targetMonth
+  ) {
+    return resultsPrefetchPromise.promise;
+  }
+
+  const requestPromise = fetch(
+    GAS_API_URL +
+      '?mode=results&month=' +
+      encodeURIComponent(targetMonth),
     {
       method: "GET",
       cache: "no-store"
@@ -4679,16 +4699,23 @@ function prefetchResults() {
         );
       }
 
-      window.resultsData =
-        response.results || [];
+      // 月切り替え後に古いリクエストが遅れて返った場合は反映しない
+      if (window.resultsCurrentMonth === targetMonth) {
 
-      window.hitRacesData =
-        response.hitRaces || [];
+        window.resultsData =
+          response.results || [];
 
-      window.resultsPrefetched = true;
+        window.hitRacesData =
+          response.hitRaces || [];
+
+        resultsLoadedMonth = targetMonth;
+        window.resultsPrefetched = true;
+
+      }
 
       console.log(
-        "★ 予想実績データ先読み完了"
+        "★ 予想実績データ取得完了:",
+        targetMonth
       );
 
       return response;
@@ -4697,106 +4724,103 @@ function prefetchResults() {
     .catch(function(error) {
 
       console.error(
-        "予想実績先読みエラー:",
+        "予想実績取得エラー:",
         error
       );
 
-      resultsPrefetchPromise = null;
-
       throw error;
+
+    })
+    .finally(function() {
+
+      if (
+        resultsPrefetchPromise &&
+        resultsPrefetchPromise.month === targetMonth
+      ) {
+        resultsPrefetchPromise = null;
+      }
 
     });
 
-  return resultsPrefetchPromise;
+  resultsPrefetchPromise = {
+    month: targetMonth,
+    promise: requestPromise
+  };
+
+  return requestPromise;
 }
-
-// ページ表示後、少し待ってから先読み開始
-window.addEventListener(
-  "load",
-  function() {
-
-    setTimeout(
-      function() {
-        prefetchResults();
-      },
-      1000
-    );
-
-  }
-);
+```
 
     
- function openResults() {
+
+function openResults() {
 
   try {
 
-    /*
-     * 予想実績データ
-     *
-     * すでに先読み済みなら即表示。
-     * 先読み中なら完了を待つ。
-     */
-    prefetchResults()
+    // 初期表示は前月
+    const now = new Date();
 
-      .then(function(response) {
+    const previousMonth = new Date(
+      now.getFullYear(),
+      now.getMonth() - 1,
+      1
+    );
 
-        /*
-         * トップ画面を隠す
-         */
+    const year = previousMonth.getFullYear();
 
-        document
-          .getElementById("topPage")
-          .style.display = "none";
+    const month = String(
+      previousMonth.getMonth() + 1
+    ).padStart(2, "0");
 
-        document
-          .getElementById("todayPage")
-          .classList.remove("active");
+    const targetMonth = year + "-" + month;
 
-        document
-          .getElementById("schedulePage")
-          .classList.remove("active");
+    window.resultsCurrentMonth = targetMonth;
 
-        document
-          .getElementById("detailPage")
-          .classList.remove("active");
+    // 予想実績画面を確認
+    const resultsPage =
+      document.getElementById("resultsPage");
 
-        document
-          .getElementById("predictionDetailPage")
-          .classList.remove("active");
+    if (!resultsPage) {
+      alert("予想実績画面を表示できません。");
+      return;
+    }
 
-        document
-          .querySelector(".app")
-          .style.display = "block";
+    // トップ画面を隠す
+    document
+      .getElementById("topPage")
+      .style.display = "none";
 
-        /*
-         * 予想実績画面を表示
-         */
+    document
+      .getElementById("todayPage")
+      .classList.remove("active");
 
-        const resultsPage =
-          document.getElementById("resultsPage");
+    document
+      .getElementById("schedulePage")
+      .classList.remove("active");
 
-        if (!resultsPage) {
+    document
+      .getElementById("detailPage")
+      .classList.remove("active");
 
-          alert(
-            "予想実績画面を表示できません。"
-          );
+    document
+      .getElementById("predictionDetailPage")
+      .classList.remove("active");
 
+    document
+      .querySelector(".app")
+      .style.display = "block";
+
+    // 予想実績画面を表示
+    resultsPage.classList.add("active");
+
+    // 選択月のデータだけ取得
+    prefetchResults(targetMonth)
+      .then(function() {
+
+        // 取得中に別の月へ移動していたら反映しない
+        if (window.resultsCurrentMonth !== targetMonth) {
           return;
-
         }
-
-        resultsPage.classList.add("active");
-
-        /*
-         * 初期表示は2026年8月
-         */
-
-        window.resultsCurrentMonth =
-          "2026-08";
-
-        /*
-         * 実績を表示
-         */
 
         renderResults();
 
@@ -4806,7 +4830,6 @@ window.addEventListener(
         });
 
       })
-
       .catch(function(error) {
 
         console.error(
@@ -4834,7 +4857,7 @@ window.addEventListener(
   }
 
 }
-    
+
 
     function renderResults() {
 
@@ -4859,7 +4882,21 @@ window.addEventListener(
 
 
   const currentMonth =
-    window.resultsCurrentMonth || "2026-08";
+  window.resultsCurrentMonth ||
+  (function() {
+    const now = new Date();
+    const previousMonth = new Date(
+      now.getFullYear(),
+      now.getMonth() - 1,
+      1
+    );
+
+    return (
+      previousMonth.getFullYear() +
+      "-" +
+      String(previousMonth.getMonth() + 1).padStart(2, "0")
+    );
+  })();
 
   const monthParts =
     currentMonth.split("-");
@@ -5239,20 +5276,85 @@ function backToTopFromResults() {
 // 予想実績：月切り替え
 // ========================================
 
-let resultsCurrentMonth = new Date(2026, 7, 1);
+
+let resultsCurrentMonth = (function() {
+  const now = new Date();
+  return new Date(
+    now.getFullYear(),
+    now.getMonth() - 1,
+    1
+  );
+})();
 
 function updateResultsMonth() {
+
   const year = resultsCurrentMonth.getFullYear();
+
   const month = resultsCurrentMonth.getMonth() + 1;
+
+  const targetMonth =
+    year + "-" + String(month).padStart(2, "0");
+
+  // 現在選択している月を更新
+  window.resultsCurrentMonth = targetMonth;
 
   document.getElementById("resultsMonth").textContent =
     year + "年" + month + "月";
 
-  window.resultsCurrentMonth =
-    year + "-" + String(month).padStart(2, "0");
+  // 古い月のデータを一時的に消す
+  window.resultsData = [];
+  window.hitRacesData = [];
 
-  renderResults();
+  const eventList =
+    document.getElementById("resultsEventList");
+
+  const hitRaceList =
+    document.getElementById("resultsHitRaceList");
+
+  if (eventList) {
+    eventList.innerHTML = "実績データを読み込んでいます…";
+  }
+
+  if (hitRaceList) {
+    hitRaceList.innerHTML = "的中レースを読み込んでいます…";
+  }
+
+  // 選択した月のデータを取得
+  prefetchResults(targetMonth)
+    .then(function() {
+
+      // 取得中に別の月へ移動していた場合は表示しない
+      if (window.resultsCurrentMonth !== targetMonth) {
+        return;
+      }
+
+      renderResults();
+
+    })
+    .catch(function(error) {
+
+      console.error(
+        "月別予想実績取得エラー:",
+        error
+      );
+
+      if (window.resultsCurrentMonth !== targetMonth) {
+        return;
+      }
+
+      if (eventList) {
+        eventList.innerHTML =
+          "実績データを取得できませんでした。";
+      }
+
+      if (hitRaceList) {
+        hitRaceList.innerHTML =
+          "的中レースを取得できませんでした。";
+      }
+
+    });
 }
+
 document
   .getElementById("resultsPrevMonth")
   .addEventListener("click", function() {
@@ -5262,6 +5364,7 @@ document
     );
 
     updateResultsMonth();
+
   });
 
 document
@@ -5273,6 +5376,7 @@ document
     );
 
     updateResultsMonth();
+
   });
 
     
