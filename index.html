@@ -2882,40 +2882,44 @@ function openSchedule() {
     }
 
 
-    function renderFeaturedRiders(scheduleId) {
+    
+function renderFeaturedRiders(scheduleId, targetList) {
 
-      const list =
-        document.getElementById("featuredList");
+  const list =
+    targetList || document.getElementById("featuredList");
 
-      const riders =
-        (window.featuredRidersData || [])
-          .filter(function(rider) {
-            return String(rider.scheduleId) === String(scheduleId);
-          });
+  if (!list) {
+    return;
+  }
 
-      if (!riders.length) {
-        list.innerHTML =
-          '<div class="featured-empty">' +
-          '現在、注目選手の情報はありません。' +
-          '</div>';
-        return;
-      }
+  const riders =
+    (window.featuredRidersData || [])
+      .filter(function(rider) {
+        return String(rider.scheduleId) === String(scheduleId);
+      });
 
-      list.innerHTML =
-        riders.map(function(rider) {
-          return (
-            '<div class="featured-card">' +
-              '<div class="featured-rider-name">' +
-                escapeHtml(rider.riderName || rider.name || "") +
-              '</div>' +
-              '<div class="featured-rider-comment">' +
-                escapeHtml(rider.comment) +
-              '</div>' +
-            '</div>'
-          );
-        }).join("");
+  if (!riders.length) {
+    list.innerHTML =
+      '<div class="featured-empty">' +
+      '現在、注目選手の情報はありません。' +
+      '</div>';
+    return;
+  }
 
-    }
+  list.innerHTML =
+    riders.map(function(rider) {
+      return (
+        '<div class="featured-card">' +
+          '<div class="featured-rider-name">' +
+            escapeHtml(rider.riderName || rider.name || "") +
+          '</div>' +
+          '<div class="featured-rider-comment">' +
+            escapeHtml(rider.comment || "") +
+          '</div>' +
+        '</div>'
+      );
+    }).join("");
+}
 
 
     function backToTop() {
@@ -3325,152 +3329,137 @@ function openSchedule() {
      * ========================================
      */
 
-    function renderDailyPredictions(schedule) {
+    
+function renderDailyPredictions(schedule, targetNote, targetList) {
 
-      const note =
-        document.getElementById("predictionDateNote");
+  const note =
+    targetNote || document.getElementById("predictionDateNote");
 
-      const list =
-        document.getElementById("predictionList");
+  const list =
+    targetList || document.getElementById("predictionList");
 
-      if (!note || !list) {
-        return;
-      }
+  if (!note || !list) {
+    return;
+  }
 
-      const today = getTodayInJapan();
+  const today = getTodayInJapan();
 
-      /*
-       * 開催期間内なら今日の日付、
-       * 期間外なら開催初日を表示対象にします。
-       */
-      let targetDate = today;
+  let targetDate = today;
 
-      if (today < schedule.startDate) {
-        targetDate = schedule.startDate;
-      }
+  if (today < schedule.startDate) {
+    targetDate = schedule.startDate;
+  }
 
-      if (today > schedule.endDate) {
-        targetDate = schedule.endDate;
-      }
+  if (today > schedule.endDate) {
+    targetDate = schedule.endDate;
+  }
 
-      const targetDateObj = new Date(targetDate + "T00:00:00");
-      const targetWeekday =
-        getJapaneseWeekdayFromDate(targetDateObj);
+  const targetDateObj = new Date(targetDate + "T00:00:00");
 
-      const dateLabel =
-        formatFullJapaneseDate(targetDate, targetWeekday);
+  const targetWeekday =
+    getJapaneseWeekdayFromDate(targetDateObj);
 
-      note.textContent =
-        "※ 表示は" + dateLabel + "の予想です。";
+  const dateLabel =
+    formatFullJapaneseDate(targetDate, targetWeekday);
 
-      const predictions =
-        (window.dailyPredictionsData || [])
-          .filter(function(item) {
+  note.textContent =
+    "※ 表示は" + dateLabel + "の予想です。";
 
-            const itemScheduleId =
-              String(
-                item.scheduleId ??
-                item.id ??
-                ""
-              ).trim().padStart(3, "0");
+  const predictions =
+    (window.dailyPredictionsData || [])
+      .filter(function(item) {
 
-            const targetScheduleId =
-              String(schedule.id)
-                .trim().padStart(3, "0");
+        const itemScheduleId =
+          String(
+            item.scheduleId ??
+            item.id ??
+            ""
+          ).trim().padStart(3, "0");
 
-            const itemDate =
-              normalizeDateString(
-                item.predictionDate ??
-                item.date ??
-                item.yosobi ??
-                ""
-              );
+        const targetScheduleId =
+          String(schedule.id)
+            .trim().padStart(3, "0");
 
-            return (
-              itemScheduleId === targetScheduleId &&
-              itemDate === targetDate
-            );
-
-          })
-          .sort(function(a, b) {
-
-            return Number(a.raceNumber ?? a.raceNo ?? 0) -
-                   Number(b.raceNumber ?? b.raceNo ?? 0);
-
-          });
-
-      if (!predictions.length) {
-
-        list.innerHTML =
-          '<div class="prediction-empty">' +
-          'この日の予想はまだ公開されていません。' +
-          '</div>';
-
-        return;
-      }
-
-      list.innerHTML =
-        predictions.map(function(item) {
-
-          const raceNumber =
-            item.raceNumber ??
-            item.raceNo ??
-            item.race ??
-            "";
-
-          const raceName =
-            item.raceName ??
-            "";
-
-          const startTime =
-            item.startTime ??
-            item.time ??
-            "";
-
-          const url =
-  item.startListUrl ??
-  item.raceUrl ??
-  item.entryUrl ??
-  item.url ??
-  "";
-
-          return (
-            '<div class="prediction-card">' +
-
-              '<div class="prediction-race">' +
-                escapeHtml(raceNumber) + 'R' +
-              '</div>' +
-
-              '<div class="prediction-info">' +
-
-                '<div class="prediction-name">' +
-                  escapeHtml(raceName) +
-                '</div>' +
-
-                '<div class="prediction-time">' +
-                  (startTime
-                    ? '発走 ' + escapeHtml(startTime)
-                    : '') +
-                '</div>' +
-
-              '</div>' +
-
-              '<button ' +
-                'class="prediction-button" ' +
-                'type="button" ' +
-                'data-schedule-id="' + escapeHtml(schedule.id) + '" ' +
-                'data-prediction-date="' + escapeHtml(targetDate) + '" ' +
-                'data-race-number="' + escapeHtml(raceNumber) + '"' +
-                '>' +
-                '予想を見る ›' +
-              '</button>' +
-
-            '</div>'
+        const itemDate =
+          normalizeDateString(
+            item.predictionDate ??
+            item.date ??
+            item.yosobi ??
+            ""
           );
 
-        }).join("");
+        return (
+          itemScheduleId === targetScheduleId &&
+          itemDate === targetDate
+        );
 
-    }
+      })
+      .sort(function(a, b) {
+        return Number(a.raceNumber ?? a.raceNo ?? 0) -
+               Number(b.raceNumber ?? b.raceNo ?? 0);
+      });
+
+  if (!predictions.length) {
+    list.innerHTML =
+      '<div class="prediction-empty">' +
+      'この日の予想はまだ公開されていません。' +
+      '</div>';
+    return;
+  }
+
+  list.innerHTML =
+    predictions.map(function(item) {
+
+      const raceNumber =
+        item.raceNumber ??
+        item.raceNo ??
+        item.race ??
+        "";
+
+      const raceName =
+        item.raceName ?? "";
+
+      const startTime =
+        item.startTime ??
+        item.time ??
+        "";
+
+      return (
+        '<div class="prediction-card">' +
+
+          '<div class="prediction-race">' +
+            escapeHtml(raceNumber) + 'R' +
+          '</div>' +
+
+          '<div class="prediction-info">' +
+
+            '<div class="prediction-name">' +
+              escapeHtml(raceName) +
+            '</div>' +
+
+            '<div class="prediction-time">' +
+              (startTime
+                ? '発走 ' + escapeHtml(startTime)
+                : '') +
+            '</div>' +
+
+          '</div>' +
+
+          '<button ' +
+            'class="prediction-button" ' +
+            'type="button" ' +
+            'data-schedule-id="' + escapeHtml(schedule.id) + '" ' +
+            'data-prediction-date="' + escapeHtml(targetDate) + '" ' +
+            'data-race-number="' + escapeHtml(raceNumber) + '"' +
+            '>' +
+            '予想を見る ›' +
+          '</button>' +
+
+        '</div>'
+      );
+
+    }).join("");
+}
 
     function renderTodayPredictions(predictions) {
 
@@ -4298,145 +4287,200 @@ document.addEventListener("click", function(event) {
 
     }
 
+
 function openCurrent() {
   window.predictionEntrySource = 'current';
 
   const today = getTodayInJapan();
-    getTodayInJapan();
 
-
-  function showCurrentSchedule() {
-
+  function showCurrentSchedules() {
     try {
-
-      const currentSchedule =
-        (window.scheduleData || []).find(
+      const currentSchedules =
+        (window.scheduleData || []).filter(
           function(schedule) {
-
             return (
               today >= schedule.startDate &&
               today <= schedule.endDate
             );
-
           }
         );
 
-
-      if (!currentSchedule) {
-
-        alert(
-          "現在開催中の開催はありません。"
-        );
-
+      if (!currentSchedules.length) {
+        alert("現在開催中の開催はありません。");
         return;
       }
 
+      document.querySelector(".app").style.display = "none";
 
-      document
-        .querySelector(".app")
-        .style.display = "none";
+      document.getElementById("schedulePage")
+        .classList.remove("active");
 
+      document.getElementById("detailPage")
+        .classList.remove("active");
 
-      document
-        .getElementById("schedulePage")
-        .classList
-        .remove("active");
+      document.getElementById("currentPage")
+        .classList.add("active");
 
+      document.getElementById("currentPageDate")
+        .textContent = formatJapaneseDate(
+          today,
+          getJapaneseWeekday(today)
+        );
 
-      document
-        .getElementById("detailPage")
-        .classList
-        .add("active");
-
-
-      document
-        .getElementById("detailHeaderTitle")
-        .textContent =
-        currentSchedule.venueText;
-
-
-      document
-        .getElementById("detailHeaderPeriod")
-        .textContent =
-        formatJapaneseDate(
-          currentSchedule.startDate,
-          currentSchedule.startWeekday
-        ) +
-        "～" +
-        formatJapaneseDate(
-          currentSchedule.endDate,
-          currentSchedule.endWeekday
-        ) +
-        " 開催";
-
-
-      renderFeaturedRiders(
-        currentSchedule.id
-      );
-
-
-      renderDailyPredictions(
-        currentSchedule
-      );
-
+      renderCurrentSchedules(currentSchedules);
 
       window.scrollTo(0, 0);
 
-
-      console.log(
-        "★ 現在開催中の情報表示完了"
-      );
-
+      console.log("★ 現在開催中の複数開催画面を表示");
 
     } catch (error) {
-
-      console.error(
-        "openCurrent error:",
-        error
-      );
-
-      alert(
-        "現在開催中の情報を取得できませんでした。"
-      );
-
+      console.error("openCurrent error:", error);
+      alert("現在開催中の情報を表示できませんでした。");
     }
-
   }
 
-
-  // すでにデータ取得済みなら
-  // そのまま表示
   if (window.appDataReady === true) {
-
-    showCurrentSchedule();
-
+    showCurrentSchedules();
     return;
-
   }
-
-
-  // まだ取得できていない場合
-  // GAS_APP_DATAを待つ
-
-  const handleAppDataReady =
-    function() {
-
-      showCurrentSchedule();
-
-    };
-
 
   window.addEventListener(
     "appDataReady",
-    handleAppDataReady,
-    {
-      once: true
-    }
+    function() {
+      showCurrentSchedules();
+    },
+    { once: true }
   );
 
-
-  // データ取得開始
   loadAppData();
+}
+
+
+function renderCurrentSchedules(schedules) {
+
+  const list =
+    document.getElementById("currentScheduleList");
+
+  if (!list) {
+    return;
+  }
+
+  list.innerHTML = schedules.map(function(schedule, index) {
+
+    const venueName =
+      schedule.venueText || schedule.venue || "開催情報";
+
+    const startDate =
+      formatJapaneseDate(
+        schedule.startDate,
+        schedule.startWeekday
+      );
+
+    const endDate =
+      formatJapaneseDate(
+        schedule.endDate,
+        schedule.endWeekday
+      );
+
+    return (
+      '<section class="current-venue-card">' +
+
+        '<button ' +
+          'type="button" ' +
+          'class="current-venue-toggle" ' +
+          'aria-expanded="' + (index === 0 ? "true" : "false") + '" ' +
+          'onclick="toggleCurrentVenue(this)">' +
+
+          '<span>' +
+            escapeHtml(venueName) +
+            '<small>' +
+              escapeHtml(startDate + "～" + endDate + " 開催") +
+            '</small>' +
+          '</span>' +
+
+          '<span class="current-venue-arrow">' +
+            (index === 0 ? "⌄" : "›") +
+          '</span>' +
+
+        '</button>' +
+
+        '<div class="current-venue-content" ' +
+          (index === 0 ? '' : 'hidden') + '>' +
+
+          '<h3>★ 今開催の注目選手</h3>' +
+          '<div class="featured-list"></div>' +
+
+          '<h3>🗓 当日予想一覧</h3>' +
+          '<div class="prediction-list"></div>' +
+
+        '</div>' +
+
+      '</section>'
+    );
+
+  }).join("");
+
+  
+  const cards =
+    list.querySelectorAll(".current-venue-card");
+
+  cards.forEach(function(card, index) {
+
+    const schedule = schedules[index];
+
+    const featuredList =
+      card.querySelector(".featured-list");
+
+    const predictionList =
+      card.querySelector(".prediction-list");
+
+    const predictionNote =
+      document.createElement("div");
+
+    predictionNote.className =
+      "prediction-date-note";
+
+    if (predictionList) {
+      predictionList.before(predictionNote);
+    }
+
+    renderFeaturedRiders(
+      schedule.id,
+      featuredList
+    );
+
+    renderDailyPredictions(
+      schedule,
+      predictionNote,
+      predictionList
+    );
+
+  });
+}
+
+
+
+function toggleCurrentVenue(button) {
+
+  const content =
+    button.nextElementSibling;
+
+  const isExpanded =
+    button.getAttribute("aria-expanded") === "true";
+
+  button.setAttribute(
+    "aria-expanded",
+    isExpanded ? "false" : "true"
+  );
+
+  content.hidden = isExpanded;
+
+  const arrow =
+    button.querySelector(".current-venue-arrow");
+
+  if (arrow) {
+    arrow.textContent = isExpanded ? "›" : "⌄";
+  }
 
 }
 
@@ -5234,5 +5278,34 @@ document
     
   </script>
 
+
+<!-- 現在開催中の情報：複数開催用 -->
+<section id="currentPage" class="detail-page">
+
+  <header class="detail-page-header">
+    <div class="main-title">現在開催中の情報</div>
+    <div class="sub-title" id="currentPageDate"></div>
+  </header>
+
+  <main class="detail-content">
+    <div id="currentScheduleList">
+      <div class="prediction-empty">
+        開催情報を読み込み中です…
+      </div>
+    </div>
+  </main>
+
+  <button
+    class="detail-back-button"
+    type="button"
+    onclick="backToTopFromCurrent()"
+  >
+    ← トップに戻る
+  </button>
+
+</section>
+
+
+  
 </body>
 </html>
