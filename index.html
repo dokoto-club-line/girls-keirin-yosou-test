@@ -204,6 +204,16 @@
       top: 71px;
     }
 
+/* 自転車アイコン（現在開催中の情報） */
+.bike-icon {
+  background: #fff2f7;
+  color: #d82c78;
+}
+
+.bike-icon svg {
+  width: 76px;
+  height: 76px;
+}
 
     /* ========================================
        王冠
@@ -657,8 +667,8 @@
 }
 
 .schedule-date {
-  width: 140px;
-  min-width: 140px;
+  width: 180px;
+  min-width: 180px;
   padding: 14px 8px;
   display: flex;
   flex-direction: column;
@@ -2131,6 +2141,27 @@
   }
 
 }    
+
+/* 注目選手見出しとキャラクター */
+.featured-heading {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.featured-heading .detail-section-title {
+  margin: 0;
+}
+
+.featured-heading-character {
+  display: block;
+  width: 45px;
+  height: 55px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
     
 </style>
 
@@ -2219,14 +2250,25 @@
   onclick="gtag('event', 'current_click'); openCurrent()"
 >
 
-        <div class="menu-icon calendar-icon">
-
-          <span></span>
-          <span></span>
-          <span></span>
-          <span></span>
-
-        </div>
+        <div class="menu-icon bike-icon">
+  <svg viewBox="0 0 100 80"
+       xmlns="http://www.w3.org/2000/svg"
+       aria-hidden="true">
+    <g fill="none"
+       stroke="currentColor"
+       stroke-width="4"
+       stroke-linecap="round"
+       stroke-linejoin="round">
+      <circle cx="23" cy="55" r="17"/>
+      <circle cx="77" cy="55" r="17"/>
+      <path d="M23 55 L38 31 L54 55 L23 55"/>
+      <path d="M54 55 L65 30 L77 55"/>
+      <path d="M34 31 H45"/>
+      <path d="M60 30 H70"/>
+      <path d="M65 30 L72 23"/>
+    </g>
+  </svg>
+</div>
 
 
         <div class="menu-text">
@@ -2236,7 +2278,7 @@
           </div>
 
           <div class="menu-description">
-            今開催の注目選手・当日予想一覧はこちら
+            注目選手・当日予想一覧はこちら
           </div>
 
         </div>
@@ -2392,9 +2434,19 @@
 
       <section>
 
-        <h2 class="detail-section-title">
-          ★ 今開催の注目選手
-        </h2>
+        <div class="featured-heading">
+
+  <h2 class="detail-section-title">
+    ★ 今開催のDOKOりん注目選手
+  </h2>
+
+  <img
+    src="dokorin.png"
+    alt="DOKOりん"
+    class="featured-heading-character"
+  >
+
+</div>
 
         <div class="featured-box">
 
@@ -2815,8 +2867,8 @@ function loadAppData() {
     document.createElement("iframe");
 
   appDataFrame.src =
-    "https://script.google.com/macros/s/AKfycbzZgmnWgmHdmk6e_agPRdZOGfTZ4uRzyrAnvehbNzAl9lF_iqYSjXFbYy3P7FrGOKk/exec";
-
+  "https://script.google.com/macros/s/AKfycbzZgmnWgmHdmk6e_agPRdZOGfTZ4uRzyrAnvehbNzAl9lF_iqYSjXFbYy3P7FrGOKk/exec";
+  
   appDataFrame.style.display = "none";
 
   document.body.appendChild(appDataFrame);
@@ -2882,44 +2934,40 @@ function openSchedule() {
     }
 
 
-    
-function renderFeaturedRiders(scheduleId, targetList) {
+    function renderFeaturedRiders(scheduleId) {
 
-  const list =
-    targetList || document.getElementById("featuredList");
+      const list =
+        document.getElementById("featuredList");
 
-  if (!list) {
-    return;
-  }
+      const riders =
+        (window.featuredRidersData || [])
+          .filter(function(rider) {
+            return String(rider.scheduleId) === String(scheduleId);
+          });
 
-  const riders =
-    (window.featuredRidersData || [])
-      .filter(function(rider) {
-        return String(rider.scheduleId) === String(scheduleId);
-      });
+      if (!riders.length) {
+        list.innerHTML =
+          '<div class="featured-empty">' +
+          '現在、注目選手の情報はありません。' +
+          '</div>';
+        return;
+      }
 
-  if (!riders.length) {
-    list.innerHTML =
-      '<div class="featured-empty">' +
-      '現在、注目選手の情報はありません。' +
-      '</div>';
-    return;
-  }
+      list.innerHTML =
+        riders.map(function(rider) {
+          return (
+            '<div class="featured-card">' +
+              '<div class="featured-rider-name">' +
+                escapeHtml(rider.riderName || rider.name || "") +
+              '</div>' +
+              '<div class="featured-rider-comment">' +
+                escapeHtml(rider.comment) +
+              '</div>' +
+            '</div>'
+          );
+        }).join("");
 
-  list.innerHTML =
-    riders.map(function(rider) {
-      return (
-        '<div class="featured-card">' +
-          '<div class="featured-rider-name">' +
-            escapeHtml(rider.riderName || rider.name || "") +
-          '</div>' +
-          '<div class="featured-rider-comment">' +
-            escapeHtml(rider.comment || "") +
-          '</div>' +
-        '</div>'
-      );
-    }).join("");
-}
+    }
 
 
     function backToTop() {
@@ -3136,12 +3184,16 @@ function renderFeaturedRiders(scheduleId, targetList) {
    * ========================================
    */
 
-  document.querySelector(".app").style.display = "none";
+ document.querySelector(".app").style.display = "none";
 
-  document.getElementById("schedulePage").classList.remove("active");
+document.getElementById("schedulePage")
+  .classList.remove("active");
 
-  document.getElementById("detailPage").classList.add("active");
+document.getElementById("detailPage")
+  .classList.add("active");
 
+document.querySelector(".detail-content")
+  .style.display = "";
 
   document.getElementById("detailHeaderTitle").textContent =
     schedule.venueText;
@@ -3329,137 +3381,152 @@ function renderFeaturedRiders(scheduleId, targetList) {
      * ========================================
      */
 
-    
-function renderDailyPredictions(schedule, targetNote, targetList) {
+    function renderDailyPredictions(schedule) {
 
-  const note =
-    targetNote || document.getElementById("predictionDateNote");
+      const note =
+        document.getElementById("predictionDateNote");
 
-  const list =
-    targetList || document.getElementById("predictionList");
+      const list =
+        document.getElementById("predictionList");
 
-  if (!note || !list) {
-    return;
-  }
+      if (!note || !list) {
+        return;
+      }
 
-  const today = getTodayInJapan();
+      const today = getTodayInJapan();
 
-  let targetDate = today;
+      /*
+       * 開催期間内なら今日の日付、
+       * 期間外なら開催初日を表示対象にします。
+       */
+      let targetDate = today;
 
-  if (today < schedule.startDate) {
-    targetDate = schedule.startDate;
-  }
+      if (today < schedule.startDate) {
+        targetDate = schedule.startDate;
+      }
 
-  if (today > schedule.endDate) {
-    targetDate = schedule.endDate;
-  }
+      if (today > schedule.endDate) {
+        targetDate = schedule.endDate;
+      }
 
-  const targetDateObj = new Date(targetDate + "T00:00:00");
+      const targetDateObj = new Date(targetDate + "T00:00:00");
+      const targetWeekday =
+        getJapaneseWeekdayFromDate(targetDateObj);
 
-  const targetWeekday =
-    getJapaneseWeekdayFromDate(targetDateObj);
+      const dateLabel =
+        formatFullJapaneseDate(targetDate, targetWeekday);
 
-  const dateLabel =
-    formatFullJapaneseDate(targetDate, targetWeekday);
+      note.textContent =
+        "※ 表示は" + dateLabel + "の予想です。";
 
-  note.textContent =
-    "※ 表示は" + dateLabel + "の予想です。";
+      const predictions =
+        (window.dailyPredictionsData || [])
+          .filter(function(item) {
 
-  const predictions =
-    (window.dailyPredictionsData || [])
-      .filter(function(item) {
+            const itemScheduleId =
+              String(
+                item.scheduleId ??
+                item.id ??
+                ""
+              ).trim().padStart(3, "0");
 
-        const itemScheduleId =
-          String(
-            item.scheduleId ??
-            item.id ??
-            ""
-          ).trim().padStart(3, "0");
+            const targetScheduleId =
+              String(schedule.id)
+                .trim().padStart(3, "0");
 
-        const targetScheduleId =
-          String(schedule.id)
-            .trim().padStart(3, "0");
+            const itemDate =
+              normalizeDateString(
+                item.predictionDate ??
+                item.date ??
+                item.yosobi ??
+                ""
+              );
 
-        const itemDate =
-          normalizeDateString(
-            item.predictionDate ??
-            item.date ??
-            item.yosobi ??
-            ""
+            return (
+              itemScheduleId === targetScheduleId &&
+              itemDate === targetDate
+            );
+
+          })
+          .sort(function(a, b) {
+
+            return Number(a.raceNumber ?? a.raceNo ?? 0) -
+                   Number(b.raceNumber ?? b.raceNo ?? 0);
+
+          });
+
+      if (!predictions.length) {
+
+        list.innerHTML =
+          '<div class="prediction-empty">' +
+          'この日の予想はまだ公開されていません。' +
+          '</div>';
+
+        return;
+      }
+
+      list.innerHTML =
+        predictions.map(function(item) {
+
+          const raceNumber =
+            item.raceNumber ??
+            item.raceNo ??
+            item.race ??
+            "";
+
+          const raceName =
+            item.raceName ??
+            "";
+
+          const startTime =
+            item.startTime ??
+            item.time ??
+            "";
+
+          const url =
+  item.startListUrl ??
+  item.raceUrl ??
+  item.entryUrl ??
+  item.url ??
+  "";
+
+          return (
+            '<div class="prediction-card">' +
+
+              '<div class="prediction-race">' +
+                escapeHtml(raceNumber) + 'R' +
+              '</div>' +
+
+              '<div class="prediction-info">' +
+
+                '<div class="prediction-name">' +
+                  escapeHtml(raceName) +
+                '</div>' +
+
+                '<div class="prediction-time">' +
+                  (startTime
+                    ? '発走 ' + escapeHtml(startTime)
+                    : '') +
+                '</div>' +
+
+              '</div>' +
+
+              '<button ' +
+                'class="prediction-button" ' +
+                'type="button" ' +
+                'data-schedule-id="' + escapeHtml(schedule.id) + '" ' +
+                'data-prediction-date="' + escapeHtml(targetDate) + '" ' +
+                'data-race-number="' + escapeHtml(raceNumber) + '"' +
+                '>' +
+                '予想を見る ›' +
+              '</button>' +
+
+            '</div>'
           );
 
-        return (
-          itemScheduleId === targetScheduleId &&
-          itemDate === targetDate
-        );
+        }).join("");
 
-      })
-      .sort(function(a, b) {
-        return Number(a.raceNumber ?? a.raceNo ?? 0) -
-               Number(b.raceNumber ?? b.raceNo ?? 0);
-      });
-
-  if (!predictions.length) {
-    list.innerHTML =
-      '<div class="prediction-empty">' +
-      'この日の予想はまだ公開されていません。' +
-      '</div>';
-    return;
-  }
-
-  list.innerHTML =
-    predictions.map(function(item) {
-
-      const raceNumber =
-        item.raceNumber ??
-        item.raceNo ??
-        item.race ??
-        "";
-
-      const raceName =
-        item.raceName ?? "";
-
-      const startTime =
-        item.startTime ??
-        item.time ??
-        "";
-
-      return (
-        '<div class="prediction-card">' +
-
-          '<div class="prediction-race">' +
-            escapeHtml(raceNumber) + 'R' +
-          '</div>' +
-
-          '<div class="prediction-info">' +
-
-            '<div class="prediction-name">' +
-              escapeHtml(raceName) +
-            '</div>' +
-
-            '<div class="prediction-time">' +
-              (startTime
-                ? '発走 ' + escapeHtml(startTime)
-                : '') +
-            '</div>' +
-
-          '</div>' +
-
-          '<button ' +
-            'class="prediction-button" ' +
-            'type="button" ' +
-            'data-schedule-id="' + escapeHtml(schedule.id) + '" ' +
-            'data-prediction-date="' + escapeHtml(targetDate) + '" ' +
-            'data-race-number="' + escapeHtml(raceNumber) + '"' +
-            '>' +
-            '予想を見る ›' +
-          '</button>' +
-
-        '</div>'
-      );
-
-    }).join("");
-}
+    }
 
     function renderTodayPredictions(predictions) {
 
@@ -3866,6 +3933,9 @@ document.addEventListener("click", function(event) {
 
   gtag('event', 'today_start_list_click');
 
+gtag('event', 'start_list_click', {
+  source: window.predictionEntrySource || 'unknown'
+});
 });
 
     function renderPredictionDetail(schedule, targetDate, selectedRaceNumber) {
@@ -4287,200 +4357,165 @@ document.addEventListener("click", function(event) {
 
     }
 
-
 function openCurrent() {
   window.predictionEntrySource = 'current';
 
   const today = getTodayInJapan();
+    getTodayInJapan();
 
-  function showCurrentSchedules() {
+
+  function showCurrentSchedule() {
+
     try {
-      const currentSchedules =
-        (window.scheduleData || []).filter(
+
+      const currentSchedule =
+        (window.scheduleData || []).find(
           function(schedule) {
+
             return (
               today >= schedule.startDate &&
               today <= schedule.endDate
             );
+
           }
         );
 
-      if (!currentSchedules.length) {
-        alert("現在開催中の開催はありません。");
-        return;
-      }
 
-      document.querySelector(".app").style.display = "none";
+   if (!currentSchedule) {
 
-      document.getElementById("schedulePage")
-        .classList.remove("active");
+  // 現在開催中の情報がなくても
+  // ポップアップは表示せず、現在開催中の画面を開く
 
-      document.getElementById("detailPage")
-        .classList.remove("active");
+  document.querySelector(".app").style.display = "none";
 
-      document.getElementById("currentPage")
-        .classList.add("active");
+  document.getElementById("schedulePage")
+    .classList.remove("active");
 
-      document.getElementById("currentPageDate")
-        .textContent = formatJapaneseDate(
-          today,
-          getJapaneseWeekday(today)
-        );
+  document.getElementById("detailPage")
+    .classList.add("active");
 
-      renderCurrentSchedules(currentSchedules);
+  // 詳細ページのタイトル
+  document.getElementById("detailHeaderTitle")
+    .textContent = "現在開催中";
+
+  // 現在開催中の情報がないことを表示
+  document.getElementById("detailHeaderPeriod")
+    .textContent = "現在開催中の開催はありません。";
+
+  // 注目選手・当日予想一覧は表示しない
+  document.querySelector(".detail-content")
+    .style.display = "none";
+
+  window.scrollTo(0, 0);
+
+  return;
+}
+
+      document
+        .querySelector(".app")
+        .style.display = "none";
+
+
+      document
+        .getElementById("schedulePage")
+        .classList
+        .remove("active");
+
+
+      document
+        .getElementById("detailPage")
+        .classList
+        .add("active");
+
+
+      document
+        .getElementById("detailHeaderTitle")
+        .textContent =
+        currentSchedule.venueText;
+
+
+      document
+        .getElementById("detailHeaderPeriod")
+        .textContent =
+        formatJapaneseDate(
+          currentSchedule.startDate,
+          currentSchedule.startWeekday
+        ) +
+        "～" +
+        formatJapaneseDate(
+          currentSchedule.endDate,
+          currentSchedule.endWeekday
+        ) +
+        " 開催";
+
+
+      renderFeaturedRiders(
+        currentSchedule.id
+      );
+
+
+      renderDailyPredictions(
+        currentSchedule
+      );
+
 
       window.scrollTo(0, 0);
 
-      console.log("★ 現在開催中の複数開催画面を表示");
+
+      console.log(
+        "★ 現在開催中の情報表示完了"
+      );
+
 
     } catch (error) {
-      console.error("openCurrent error:", error);
-      alert("現在開催中の情報を表示できませんでした。");
+
+      console.error(
+        "openCurrent error:",
+        error
+      );
+
+      alert(
+        "現在開催中の情報を取得できませんでした。"
+      );
+
     }
+
   }
 
+
+  // すでにデータ取得済みなら
+  // そのまま表示
   if (window.appDataReady === true) {
-    showCurrentSchedules();
+
+    showCurrentSchedule();
+
     return;
+
   }
+
+
+  // まだ取得できていない場合
+  // GAS_APP_DATAを待つ
+
+  const handleAppDataReady =
+    function() {
+
+      showCurrentSchedule();
+
+    };
+
 
   window.addEventListener(
     "appDataReady",
-    function() {
-      showCurrentSchedules();
-    },
-    { once: true }
-  );
-
-  loadAppData();
-}
-
-
-function renderCurrentSchedules(schedules) {
-
-  const list =
-    document.getElementById("currentScheduleList");
-
-  if (!list) {
-    return;
-  }
-
-  list.innerHTML = schedules.map(function(schedule, index) {
-
-    const venueName =
-      schedule.venueText || schedule.venue || "開催情報";
-
-    const startDate =
-      formatJapaneseDate(
-        schedule.startDate,
-        schedule.startWeekday
-      );
-
-    const endDate =
-      formatJapaneseDate(
-        schedule.endDate,
-        schedule.endWeekday
-      );
-
-    return (
-      '<section class="current-venue-card">' +
-
-        '<button ' +
-          'type="button" ' +
-          'class="current-venue-toggle" ' +
-          'aria-expanded="' + (index === 0 ? "true" : "false") + '" ' +
-          'onclick="toggleCurrentVenue(this)">' +
-
-          '<span>' +
-            escapeHtml(venueName) +
-            '<small>' +
-              escapeHtml(startDate + "～" + endDate + " 開催") +
-            '</small>' +
-          '</span>' +
-
-          '<span class="current-venue-arrow">' +
-            (index === 0 ? "⌄" : "›") +
-          '</span>' +
-
-        '</button>' +
-
-        '<div class="current-venue-content" ' +
-          (index === 0 ? '' : 'hidden') + '>' +
-
-          '<h3>★ 今開催の注目選手</h3>' +
-          '<div class="featured-list"></div>' +
-
-          '<h3>🗓 当日予想一覧</h3>' +
-          '<div class="prediction-list"></div>' +
-
-        '</div>' +
-
-      '</section>'
-    );
-
-  }).join("");
-
-  
-  const cards =
-    list.querySelectorAll(".current-venue-card");
-
-  cards.forEach(function(card, index) {
-
-    const schedule = schedules[index];
-
-    const featuredList =
-      card.querySelector(".featured-list");
-
-    const predictionList =
-      card.querySelector(".prediction-list");
-
-    const predictionNote =
-      document.createElement("div");
-
-    predictionNote.className =
-      "prediction-date-note";
-
-    if (predictionList) {
-      predictionList.before(predictionNote);
+    handleAppDataReady,
+    {
+      once: true
     }
-
-    renderFeaturedRiders(
-      schedule.id,
-      featuredList
-    );
-
-    renderDailyPredictions(
-      schedule,
-      predictionNote,
-      predictionList
-    );
-
-  });
-}
-
-
-
-function toggleCurrentVenue(button) {
-
-  const content =
-    button.nextElementSibling;
-
-  const isExpanded =
-    button.getAttribute("aria-expanded") === "true";
-
-  button.setAttribute(
-    "aria-expanded",
-    isExpanded ? "false" : "true"
   );
 
-  content.hidden = isExpanded;
 
-  const arrow =
-    button.querySelector(".current-venue-arrow");
-
-  if (arrow) {
-    arrow.textContent = isExpanded ? "›" : "⌄";
-  }
+  // データ取得開始
+  loadAppData();
 
 }
 
@@ -4641,105 +4676,58 @@ function openToday() {
 
 }
 
-```javascript
-// 指定した月の予想実績データを取得
+// 予想実績データをバックグラウンドで先読み
 let resultsPrefetchPromise = null;
-let resultsLoadedMonth = '';
 
 function prefetchResults(targetMonth) {
 
-  // 同じ月のデータが取得済みなら再利用
   if (
-    resultsLoadedMonth === targetMonth &&
-    window.resultsPrefetched === true
-  ) {
-    return Promise.resolve({
-      success: true,
-      results: window.resultsData || [],
-      hitRaces: window.hitRacesData || []
-    });
-  }
+  resultsPrefetchPromise &&
+  resultsPrefetchPromise.month === targetMonth
+) {
+  return resultsPrefetchPromise.promise;
+}
 
-  // 同じ月の取得が進行中なら、その処理を再利用
-  if (
-    resultsPrefetchPromise &&
-    resultsPrefetchPromise.month === targetMonth
-  ) {
-    return resultsPrefetchPromise.promise;
-  }
-
+  
   const requestPromise = fetch(
-    GAS_API_URL +
-      '?mode=results&month=' +
-      encodeURIComponent(targetMonth),
+    GAS_API_URL + '?mode=results&month=' + encodeURIComponent(targetMonth),
     {
       method: "GET",
       cache: "no-store"
     }
   )
     .then(function(response) {
-
       if (!response.ok) {
-        throw new Error(
-          "HTTP error: " + response.status
-        );
+        throw new Error("HTTP error: " + response.status);
       }
-
       return response.json();
-
     })
     .then(function(response) {
-
-      if (
-        !response ||
-        response.success !== true
-      ) {
-        throw new Error(
-          "予想実績データの取得に失敗しました。"
-        );
+      if (!response || response.success !== true) {
+        throw new Error("予想実績データの取得に失敗しました。");
       }
 
-      // 月切り替え後に古いリクエストが遅れて返った場合は反映しない
+      // 表示中の月と一致する場合だけ画面データを更新
       if (window.resultsCurrentMonth === targetMonth) {
-
-        window.resultsData =
-          response.results || [];
-
-        window.hitRacesData =
-          response.hitRaces || [];
-
-        resultsLoadedMonth = targetMonth;
+        window.resultsData = response.results || [];
+        window.hitRacesData = response.hitRaces || [];
         window.resultsPrefetched = true;
-
       }
 
-      console.log(
-        "★ 予想実績データ取得完了:",
-        targetMonth
-      );
-
+      console.log("★ 予想実績データ取得完了:", targetMonth);
       return response;
-
     })
     .catch(function(error) {
-
-      console.error(
-        "予想実績取得エラー:",
-        error
-      );
-
+      console.error("予想実績取得エラー:", error);
       throw error;
-
     })
     .finally(function() {
-
       if (
         resultsPrefetchPromise &&
         resultsPrefetchPromise.month === targetMonth
       ) {
         resultsPrefetchPromise = null;
       }
-
     });
 
   resultsPrefetchPromise = {
@@ -4748,79 +4736,97 @@ function prefetchResults(targetMonth) {
   };
 
   return requestPromise;
+
 }
-```
+
 
     
-
-function openResults() {
+ function openResults() {
 
   try {
 
-    // 初期表示は前月
-    const now = new Date();
+    /*
+     * 予想実績データ
+     *
+     * すでに先読み済みなら即表示。
+     * 先読み中なら完了を待つ。
+     */
 
-    const previousMonth = new Date(
-      now.getFullYear(),
-      now.getMonth() - 1,
-      1
-    );
+　　const now = new Date();
 
-    const year = previousMonth.getFullYear();
+resultsCurrentMonth = new Date(
+  now.getFullYear(),
+  now.getMonth() - 1,
+  1
+);
 
-    const month = String(
-      previousMonth.getMonth() + 1
-    ).padStart(2, "0");
+const year = resultsCurrentMonth.getFullYear();
+const month = String(
+  resultsCurrentMonth.getMonth() + 1
+).padStart(2, "0");
 
-    const targetMonth = year + "-" + month;
+const targetMonth = year + "-" + month;
 
-    window.resultsCurrentMonth = targetMonth;
+window.resultsCurrentMonth = targetMonth;
+    
+   prefetchResults(targetMonth)
 
-    // 予想実績画面を確認
-    const resultsPage =
-      document.getElementById("resultsPage");
+      .then(function(response) {
 
-    if (!resultsPage) {
-      alert("予想実績画面を表示できません。");
-      return;
-    }
+        /*
+         * トップ画面を隠す
+         */
 
-    // トップ画面を隠す
-    document
-      .getElementById("topPage")
-      .style.display = "none";
+        document
+          .getElementById("topPage")
+          .style.display = "none";
 
-    document
-      .getElementById("todayPage")
-      .classList.remove("active");
+        document
+          .getElementById("todayPage")
+          .classList.remove("active");
 
-    document
-      .getElementById("schedulePage")
-      .classList.remove("active");
+        document
+          .getElementById("schedulePage")
+          .classList.remove("active");
 
-    document
-      .getElementById("detailPage")
-      .classList.remove("active");
+        document
+          .getElementById("detailPage")
+          .classList.remove("active");
 
-    document
-      .getElementById("predictionDetailPage")
-      .classList.remove("active");
+        document
+          .getElementById("predictionDetailPage")
+          .classList.remove("active");
 
-    document
-      .querySelector(".app")
-      .style.display = "block";
+        document
+          .querySelector(".app")
+          .style.display = "block";
 
-    // 予想実績画面を表示
-    resultsPage.classList.add("active");
+        /*
+         * 予想実績画面を表示
+         */
 
-    // 選択月のデータだけ取得
-    prefetchResults(targetMonth)
-      .then(function() {
+        const resultsPage =
+          document.getElementById("resultsPage");
 
-        // 取得中に別の月へ移動していたら反映しない
-        if (window.resultsCurrentMonth !== targetMonth) {
+        if (!resultsPage) {
+
+          alert(
+            "予想実績画面を表示できません。"
+          );
+
           return;
+
         }
+
+        resultsPage.classList.add("active");
+
+        document.getElementById("resultsMonth").textContent =
+  resultsCurrentMonth.getFullYear() + "年" +
+  (resultsCurrentMonth.getMonth() + 1) + "月";
+
+        /*
+         * 実績を表示
+         */
 
         renderResults();
 
@@ -4830,6 +4836,7 @@ function openResults() {
         });
 
       })
+
       .catch(function(error) {
 
         console.error(
@@ -4857,7 +4864,7 @@ function openResults() {
   }
 
 }
-
+    
 
     function renderResults() {
 
@@ -4881,22 +4888,7 @@ function openResults() {
   }
 
 
-  const currentMonth =
-  window.resultsCurrentMonth ||
-  (function() {
-    const now = new Date();
-    const previousMonth = new Date(
-      now.getFullYear(),
-      now.getMonth() - 1,
-      1
-    );
-
-    return (
-      previousMonth.getFullYear() +
-      "-" +
-      String(previousMonth.getMonth() + 1).padStart(2, "0")
-    );
-  })();
+  const currentMonth = window.resultsCurrentMonth;
 
   const monthParts =
     currentMonth.split("-");
@@ -5276,85 +5268,41 @@ function backToTopFromResults() {
 // 予想実績：月切り替え
 // ========================================
 
-
-let resultsCurrentMonth = (function() {
-  const now = new Date();
-  return new Date(
-    now.getFullYear(),
-    now.getMonth() - 1,
-    1
-  );
-})();
+let resultsCurrentMonth = new Date(
+  new Date().getFullYear(),
+  new Date().getMonth() - 1,
+  1
+);
 
 function updateResultsMonth() {
-
   const year = resultsCurrentMonth.getFullYear();
-
   const month = resultsCurrentMonth.getMonth() + 1;
-
-  const targetMonth =
-    year + "-" + String(month).padStart(2, "0");
-
-  // 現在選択している月を更新
-  window.resultsCurrentMonth = targetMonth;
 
   document.getElementById("resultsMonth").textContent =
     year + "年" + month + "月";
 
-  // 古い月のデータを一時的に消す
-  window.resultsData = [];
-  window.hitRacesData = [];
+  const targetMonth =
+  year + "-" + String(month).padStart(2, "0");
 
-  const eventList =
-    document.getElementById("resultsEventList");
+window.resultsCurrentMonth = targetMonth;
 
-  const hitRaceList =
-    document.getElementById("resultsHitRaceList");
+// 月が変わったので、古いデータを消してから取得する
+window.resultsData = [];
+window.hitRacesData = [];
+window.resultsPrefetched = false;
 
-  if (eventList) {
-    eventList.innerHTML = "実績データを読み込んでいます…";
-  }
+renderResults();
 
-  if (hitRaceList) {
-    hitRaceList.innerHTML = "的中レースを読み込んでいます…";
-  }
-
-  // 選択した月のデータを取得
-  prefetchResults(targetMonth)
-    .then(function() {
-
-      // 取得中に別の月へ移動していた場合は表示しない
-      if (window.resultsCurrentMonth !== targetMonth) {
-        return;
-      }
-
+prefetchResults(targetMonth)
+  .then(function() {
+    if (window.resultsCurrentMonth === targetMonth) {
       renderResults();
-
-    })
-    .catch(function(error) {
-
-      console.error(
-        "月別予想実績取得エラー:",
-        error
-      );
-
-      if (window.resultsCurrentMonth !== targetMonth) {
-        return;
-      }
-
-      if (eventList) {
-        eventList.innerHTML =
-          "実績データを取得できませんでした。";
-      }
-
-      if (hitRaceList) {
-        hitRaceList.innerHTML =
-          "的中レースを取得できませんでした。";
-      }
-
-    });
+    }
+  })
+  .catch(function(error) {
+    console.error("月別の予想実績取得エラー:", error);
+  });
 }
-
 document
   .getElementById("resultsPrevMonth")
   .addEventListener("click", function() {
@@ -5364,7 +5312,6 @@ document
     );
 
     updateResultsMonth();
-
   });
 
 document
@@ -5376,40 +5323,10 @@ document
     );
 
     updateResultsMonth();
-
   });
 
     
   </script>
 
-
-<!-- 現在開催中の情報：複数開催用 -->
-<section id="currentPage" class="detail-page">
-
-  <header class="detail-page-header">
-    <div class="main-title">現在開催中の情報</div>
-    <div class="sub-title" id="currentPageDate"></div>
-  </header>
-
-  <main class="detail-content">
-    <div id="currentScheduleList">
-      <div class="prediction-empty">
-        開催情報を読み込み中です…
-      </div>
-    </div>
-  </main>
-
-  <button
-    class="detail-back-button"
-    type="button"
-    onclick="backToTopFromCurrent()"
-  >
-    ← トップに戻る
-  </button>
-
-</section>
-
-
-  
 </body>
 </html>
