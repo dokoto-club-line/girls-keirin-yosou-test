@@ -4628,12 +4628,12 @@ function renderCurrentOverview(activeSchedules) {
           '<div class="current-main-venue">' + escapeHtml(mainVenue) + '</div>' +
           '<div class="current-main-date">' + escapeHtml(dateLabel) + '</div>' +
         '</div>' +
-        '<div class="current-main-status"><span class="current-today-badge">本日</span><strong>' + escapeHtml(mainStatus) + '</strong></div>' +
+        '<div class="current-main-status">' +
+          '<span class="current-today-badge">本日</span>' +
+          '<strong>' + escapeHtml(mainStatus) + '</strong>' +
+          (mainPredictions.length ? '<span class="current-published-label">予想公開中</span>' : '') +
+        '</div>' +
       '</article>' +
-      '<section class="current-section">' +
-        '<h2 class="current-section-title">♛ 本日の予想レース</h2>' +
-        '<div class="current-race-list">' + makeCurrentRaceCards(mainSchedule, mainPredictions, today) + '</div>' +
-      '</section>' +
       '<section class="current-section current-featured-section">' +
         '<h2 class="current-section-title">♛ 注目選手（' + (featuredMarkup.match(/current-featured-row/g) || []).length + '名）</h2>' +
         '<div class="current-featured-list">' + featuredMarkup + '</div>' +
