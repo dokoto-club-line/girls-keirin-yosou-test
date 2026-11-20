@@ -2163,6 +2163,125 @@
   flex-shrink: 0;
 }
     
+
+
+/* ========================================
+   現在開催中：複数開催・メイン開催表示
+======================================== */
+.current-page {
+  display: none;
+  width: 100%;
+  min-height: 100vh;
+  background: #ffffff;
+  box-sizing: border-box;
+}
+.current-page.active { display: block; }
+.current-page-header {
+  position: relative;
+  padding: 22px 18px 16px;
+  background: linear-gradient(135deg, #e50063, #ed3985);
+  color: #ffffff;
+  text-align: center;
+  box-sizing: border-box;
+}
+.current-header-back {
+  position: absolute;
+  left: 12px;
+  top: 18px;
+  width: 34px;
+  height: 38px;
+  border: 0;
+  background: transparent;
+  color: #ffffff;
+  font-size: 38px;
+  line-height: 1;
+  cursor: pointer;
+}
+.current-page-title { padding: 0 22px; font-size: 21px; font-weight: 800; line-height: 1.35; }
+.current-page-date { margin-top: 5px; font-size: 14px; font-weight: 700; }
+.current-page-content { padding: 18px 16px 0; }
+.current-main-event {
+  overflow: hidden;
+  border: 1px solid #f1dce5;
+  border-radius: 16px;
+  background: linear-gradient(110deg, #fff0f6, #ffffff);
+  box-shadow: 0 2px 6px rgba(0,0,0,.07);
+}
+.current-main-event-top { min-height: 112px; padding: 14px 16px 12px; box-sizing: border-box; }
+.current-grade-badge {
+  display: inline-block;
+  min-width: 48px;
+  padding: 4px 12px;
+  border-radius: 18px;
+  background: #e50063;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 800;
+  text-align: center;
+}
+.current-main-venue { margin-top: 7px; color: #d9005e; font-size: 25px; font-weight: 900; line-height: 1.2; }
+.current-main-date { margin-top: 5px; color: #222222; font-size: 14px; font-weight: 700; }
+.current-main-status { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-top: 1px solid #f3e2e9; background: rgba(255,255,255,.72); color: #222222; }
+.current-today-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 54px; padding: 7px 10px; border-radius: 7px; background: #e93683; color: #ffffff; font-size: 13px; font-weight: 800; }
+.current-main-status strong { font-size: 15px; }
+.current-section { margin-top: 22px; }
+.current-section-title { margin: 0 0 10px; color: #d9005e; font-size: 19px; font-weight: 900; }
+.current-race-list { display: flex; flex-direction: column; gap: 9px; }
+.current-race-card { display: flex; align-items: center; min-height: 72px; padding: 9px 10px 9px 14px; border: 1px solid #f0e4e9; border-radius: 13px; background: linear-gradient(110deg, #fff0f6, #fffafb); box-shadow: 0 2px 5px rgba(0,0,0,.07); box-sizing: border-box; }
+.current-race-main { min-width: 78px; }
+.current-race-number { display: inline-block; min-width: 58px; padding: 5px 8px; border-radius: 9px; background: #e62b79; color: #ffffff; font-size: 23px; font-weight: 900; line-height: 1.15; text-align: center; }
+.current-race-time { margin-top: 3px; color: #222222; font-size: 12px; font-weight: 700; }
+.current-published-label { margin-left: 10px; padding: 4px 10px; border: 1px solid #f06a9e; border-radius: 16px; color: #d9005e; font-size: 11px; font-weight: 800; white-space: nowrap; }
+.current-race-open { display: flex; align-items: center; justify-content: center; width: 36px; min-width: 36px; height: 44px; margin: 0 0 0 auto; padding: 0; border: 0; background: transparent; color: #e50063; font-size: 34px; font-weight: 400; }
+.current-featured-section { margin-top: 22px; }
+.current-featured-list { overflow: hidden; border-radius: 15px; background: #fff0f6; }
+.current-featured-row { display: grid; grid-template-columns: minmax(100px, 38%) minmax(0, 1fr); align-items: center; gap: 8px; min-height: 42px; padding: 7px 12px; box-sizing: border-box; }
+.current-featured-row + .current-featured-row { border-top: 1px solid rgba(216,44,120,.12); }
+.current-featured-name { overflow: hidden; color: #171717; font-size: 15px; font-weight: 900; text-overflow: ellipsis; white-space: nowrap; }
+.current-featured-comment { overflow: hidden; min-width: 0; padding-left: 9px; border-left: 1px solid #d6a9bb; color: #333333; font-size: 12px; line-height: 1.35; text-overflow: ellipsis; white-space: nowrap; }
+.current-featured-empty, .current-empty { padding: 18px 12px; border-radius: 12px; background: #fff2f7; color: #777777; font-size: 13px; line-height: 1.6; text-align: center; }
+.current-featured-empty { background: transparent; }
+.current-main-all, .current-other-all { display: block; width: 100%; min-height: 48px; margin-top: 16px; border: 2px solid #e50063; border-radius: 18px; background: #ffffff; color: #d9005e; font-size: 15px; font-weight: 900; cursor: pointer; }
+.current-other-section { margin-top: 20px; }
+.current-other-heading { margin: 0 0 10px; color: #333333; font-size: 16px; font-weight: 800; }
+.current-other-event { overflow: hidden; margin-top: 10px; border: 1px solid #e4eaf0; border-radius: 14px; background: #f0f7ff; box-shadow: 0 2px 5px rgba(0,0,0,.06); }
+.current-other-event:nth-of-type(2n) { border-color: #dceedd; background: #f1fbf1; }
+.current-other-summary { display: block; padding: 12px 14px; list-style: none; cursor: pointer; }
+.current-other-summary::-webkit-details-marker { display: none; }
+.current-other-topline { display: flex; align-items: center; gap: 9px; }
+.current-other-topline .current-grade-badge { background: #0879d7; }
+.current-other-event:nth-of-type(2n) .current-grade-badge { background: #159b3b; }
+.current-other-venue { color: #0755aa; font-size: 19px; font-weight: 900; }
+.current-other-event:nth-of-type(2n) .current-other-venue { color: #16823a; }
+.current-other-bottomline { display: flex; align-items: center; gap: 9px; margin-top: 10px; }
+.current-other-bottomline .current-today-badge { min-width: 40px; padding: 5px 7px; background: #28a6f0; font-size: 11px; }
+.current-other-event:nth-of-type(2n) .current-today-badge { background: #32b94d; }
+.current-other-status { color: #222222; font-size: 12px; font-weight: 700; white-space: nowrap; }
+.current-other-races { display: flex; flex-direction: column; gap: 1px; margin-left: auto; color: #074fa5; }
+.current-other-event:nth-of-type(2n) .current-other-races { color: #16823a; }
+.current-other-races small { color: #333333; font-size: 9px; }
+.current-other-races strong { font-size: 17px; line-height: 1.1; }
+.current-accordion-arrow { margin-left: 6px; color: #0755aa; font-size: 26px; line-height: 1; transition: transform .2s; }
+.current-other-event:nth-of-type(2n) .current-accordion-arrow { color: #16823a; }
+.current-other-event[open] .current-accordion-arrow { transform: rotate(180deg); }
+.current-other-body { padding: 0 12px 12px; }
+.current-other-body .current-race-card { background: rgba(255,255,255,.8); }
+.current-other-body .current-race-number { background: #1682d5; }
+.current-other-event:nth-of-type(2n) .current-race-number { background: #199a3c; }
+.current-other-body .current-race-open { color: #0879d7; }
+.current-other-event:nth-of-type(2n) .current-race-open { color: #16823a; }
+.current-other-all { min-height: 42px; margin-top: 10px; border-color: #7ab5e7; color: #0755aa; font-size: 13px; }
+.current-back-button { display: block; width: calc(100% - 32px); min-height: 54px; margin: 24px 16px 28px; border: 2px solid #e50063; border-radius: 17px; background: #ffffff; color: #d9005e; font-size: 17px; font-weight: 900; cursor: pointer; }
+@media (max-width: 380px) {
+  .current-page-title { font-size: 18px; }
+  .current-page-content { padding-left: 12px; padding-right: 12px; }
+  .current-featured-row { grid-template-columns: minmax(88px, 38%) minmax(0, 1fr); gap: 6px; padding-left: 9px; padding-right: 9px; }
+  .current-featured-name { font-size: 13px; }
+  .current-featured-comment { font-size: 11px; }
+  .current-race-number { min-width: 52px; font-size: 21px; }
+  .current-published-label { margin-left: 6px; padding: 4px 7px; font-size: 10px; }
+}
+
 </style>
 
 <!-- Google Analytics 4 -->
@@ -2491,6 +2610,26 @@
 
 
 
+
+<!-- ======================================
+     現在開催中の情報（複数開催対応）
+======================================= -->
+
+<section id="currentPage" class="current-page">
+  <header class="current-page-header">
+    <button class="current-header-back" type="button" onclick="backToTop()" aria-label="トップに戻る">‹</button>
+    <div class="current-page-title">本日開催中のガールズケイリン</div>
+    <div class="current-page-date" id="currentHeaderDate"></div>
+  </header>
+
+  <main class="current-page-content">
+    <div id="currentScheduleList">
+      <div class="current-empty">開催情報を読み込み中です…</div>
+    </div>
+  </main>
+
+  <button class="current-back-button" type="button" onclick="backToTop()">← トップに戻る</button>
+</section>
 
 <!-- ======================================
      予想詳細画面
@@ -2934,10 +3073,12 @@ function openSchedule() {
     }
 
 
-    function renderFeaturedRiders(scheduleId) {
+    function renderFeaturedRiders(scheduleId, targetListId) {
 
       const list =
-        document.getElementById("featuredList");
+        document.getElementById(targetListId || "featuredList");
+
+      if (!list) return;
 
       const riders =
         (window.featuredRidersData || [])
@@ -2972,7 +3113,11 @@ function openSchedule() {
 
     function backToTop() {
 
+      const currentPage = document.getElementById("currentPage");
+      if (currentPage) currentPage.classList.remove("active");
+      document.getElementById("detailPage").classList.remove("active");
       document.getElementById("schedulePage").classList.remove("active");
+      document.querySelector(".app").style.display = "block";
       document.getElementById("topPage").style.display = "block";
 
       window.scrollTo(0, 0);
@@ -3186,6 +3331,9 @@ function openSchedule() {
 
  document.querySelector(".app").style.display = "none";
 
+const currentPageForDetail = document.getElementById("currentPage");
+if (currentPageForDetail) currentPageForDetail.classList.remove("active");
+
 document.getElementById("schedulePage")
   .classList.remove("active");
 
@@ -3360,6 +3508,9 @@ document.querySelector(".detail-content")
      */
 
     function backToTop() {
+
+      const currentPage = document.getElementById("currentPage");
+      if (currentPage) currentPage.classList.remove("active");
 
       document.getElementById("detailPage").classList.remove("active");
 
@@ -4357,166 +4508,173 @@ gtag('event', 'start_list_click', {
 
     }
 
-function openCurrent() {
-  window.predictionEntrySource = 'current';
-
-  const today = getTodayInJapan();
-    getTodayInJapan();
-
-
-  function showCurrentSchedule() {
-
-    try {
-
-      const currentSchedule =
-        (window.scheduleData || []).find(
-          function(schedule) {
-
-            return (
-              today >= schedule.startDate &&
-              today <= schedule.endDate
-            );
-
-          }
-        );
-
-
-   if (!currentSchedule) {
-
-  // 現在開催中の情報がなくても
-  // ポップアップは表示せず、現在開催中の画面を開く
-
-  document.querySelector(".app").style.display = "none";
-
-  document.getElementById("schedulePage")
-    .classList.remove("active");
-
-  document.getElementById("detailPage")
-    .classList.add("active");
-
-  // 詳細ページのタイトル
-  document.getElementById("detailHeaderTitle")
-    .textContent = "現在開催中";
-
-  // 現在開催中の情報がないことを表示
-  document.getElementById("detailHeaderPeriod")
-    .textContent = "現在開催中の開催はありません。";
-
-  // 注目選手・当日予想一覧は表示しない
-  document.querySelector(".detail-content")
-    .style.display = "none";
-
-  window.scrollTo(0, 0);
-
-  return;
+function getCurrentPredictionsForSchedule(schedule, targetDate) {
+  const targetScheduleId = String(schedule.id || "").trim().padStart(3, "0");
+  return (window.dailyPredictionsData || [])
+    .filter(function(item) {
+      const itemScheduleId = String(item.scheduleId ?? item.id ?? "").trim().padStart(3, "0");
+      const itemDate = normalizeDateString(item.predictionDate ?? item.date ?? item.yosobi ?? "");
+      return itemScheduleId === targetScheduleId && itemDate === targetDate;
+    })
+    .sort(function(a, b) {
+      return Number(a.raceNumber ?? a.raceNo ?? a.race ?? 0) -
+             Number(b.raceNumber ?? b.raceNo ?? b.race ?? 0);
+    });
 }
 
-      document
-        .querySelector(".app")
-        .style.display = "none";
+function getCurrentScheduleStatus(schedule, today) {
+  if (today === schedule.endDate) return "最終日";
+  if (today === schedule.startDate) return "初日";
+  return "開催中";
+}
 
+function makeCurrentRaceCards(schedule, predictions, targetDate) {
+  if (!predictions.length) {
+    return '<div class="current-empty current-race-empty">この日の予想はまだ公開されていません。</div>';
+  }
 
-      document
-        .getElementById("schedulePage")
-        .classList
-        .remove("active");
+  return predictions.map(function(item) {
+    const raceNumber = item.raceNumber ?? item.raceNo ?? item.race ?? "";
+    const startTime = item.startTime ?? item.time ?? "";
+    return (
+      '<div class="current-race-card">' +
+        '<div class="current-race-main">' +
+          '<div class="current-race-number">' + escapeHtml(raceNumber) + 'R</div>' +
+          '<div class="current-race-time">' + (startTime ? '発走 ' + escapeHtml(startTime) : '') + '</div>' +
+        '</div>' +
+        '<span class="current-published-label">予想公開中</span>' +
+        '<button class="prediction-button current-race-open" type="button" ' +
+          'aria-label="' + escapeHtml(raceNumber) + 'レースの予想を見る" ' +
+          'data-schedule-id="' + escapeHtml(schedule.id) + '" ' +
+          'data-prediction-date="' + escapeHtml(targetDate) + '" ' +
+          'data-race-number="' + escapeHtml(raceNumber) + '">›</button>' +
+      '</div>'
+    );
+  }).join("");
+}
 
+function renderCurrentOverview(activeSchedules) {
+  const page = document.getElementById("currentPage");
+  const list = document.getElementById("currentScheduleList");
+  const dateElement = document.getElementById("currentHeaderDate");
+  if (!page || !list) return;
 
-      document
-        .getElementById("detailPage")
-        .classList
-        .add("active");
+  const today = getTodayInJapan();
+  const todayObject = new Date(today + "T00:00:00");
+  const weekday = getJapaneseWeekdayFromDate(todayObject);
+  const dateLabel = formatFullJapaneseDate(today, weekday);
+  if (dateElement) dateElement.textContent = dateLabel + " 開催";
 
+  // 表示順はスプレッドシートの開催順を維持し、先頭開催をメイン表示にします。
+  if (!activeSchedules.length) {
+    list.innerHTML = '<div class="current-empty">現在開催中の開催はありません。</div>';
+  } else {
+    const mainSchedule = activeSchedules.find(function(schedule) {
+      return schedule.detail === true;
+    }) || activeSchedules[0];
+    const otherSchedules = activeSchedules.filter(function(schedule) {
+      return schedule !== mainSchedule;
+    });
+    const mainPredictions = getCurrentPredictionsForSchedule(mainSchedule, today);
+    const mainVenue = mainSchedule.venueText || mainSchedule.venue || "開催場";
+    const mainGrade = mainSchedule.grade || "";
+    const mainStatus = getCurrentScheduleStatus(mainSchedule, today);
 
-      document
-        .getElementById("detailHeaderTitle")
-        .textContent =
-        currentSchedule.venueText;
+    const featuredMarkup = (function() {
+      const riders = (window.featuredRidersData || []).filter(function(rider) {
+        return String(rider.scheduleId).trim().padStart(3, "0") === String(mainSchedule.id).trim().padStart(3, "0");
+      });
+      if (!riders.length) return '<div class="current-featured-empty">現在、注目選手の情報はありません。</div>';
+      return riders.map(function(rider) {
+        return '<div class="current-featured-row">' +
+          '<div class="current-featured-name">' + escapeHtml(rider.riderName || rider.name || "") + '</div>' +
+          '<div class="current-featured-comment" title="' + escapeHtml(rider.comment || "") + '">' + escapeHtml(rider.comment || "") + '</div>' +
+        '</div>';
+      }).join("");
+    })();
 
+    const otherMarkup = otherSchedules.map(function(schedule, index) {
+      const venue = schedule.venueText || schedule.venue || "開催場";
+      const predictions = getCurrentPredictionsForSchedule(schedule, today);
+      const raceSummary = predictions.length
+        ? predictions.map(function(item) { return escapeHtml(item.raceNumber ?? item.raceNo ?? item.race ?? "") + "R"; }).join("・")
+        : "予想公開前";
+      const otherStatus = getCurrentScheduleStatus(schedule, today);
+      const grade = schedule.grade || "";
+      return '<details class="current-other-event" data-event-index="' + index + '">' +
+        '<summary class="current-other-summary">' +
+          '<div class="current-other-topline">' +
+            (grade ? '<span class="current-grade-badge">' + escapeHtml(grade) + '</span>' : '') +
+            '<span class="current-other-venue">' + escapeHtml(venue) + '</span>' +
+          '</div>' +
+          '<div class="current-other-bottomline">' +
+            '<span class="current-today-badge">本日</span>' +
+            '<span class="current-other-status">' + escapeHtml(otherStatus) + '</span>' +
+            '<span class="current-other-races"><small>予想対象レース</small><strong>' + raceSummary + '</strong></span>' +
+            '<span class="current-accordion-arrow" aria-hidden="true">⌄</span>' +
+          '</div>' +
+        '</summary>' +
+        '<div class="current-other-body">' +
+          makeCurrentRaceCards(schedule, predictions, today) +
+          '<button class="current-other-all" type="button" onclick="openScheduleDetail(\'' + escapeJs(schedule.id) + '\')">' + escapeHtml(venue) + 'の予想をすべて見る ›</button>' +
+        '</div>' +
+      '</details>';
+    }).join("");
 
-      document
-        .getElementById("detailHeaderPeriod")
-        .textContent =
-        formatJapaneseDate(
-          currentSchedule.startDate,
-          currentSchedule.startWeekday
-        ) +
-        "～" +
-        formatJapaneseDate(
-          currentSchedule.endDate,
-          currentSchedule.endWeekday
-        ) +
-        " 開催";
+    list.innerHTML =
+      '<article class="current-main-event">' +
+        '<div class="current-main-event-top">' +
+          (mainGrade ? '<span class="current-grade-badge">' + escapeHtml(mainGrade) + '</span>' : '') +
+          '<div class="current-main-venue">' + escapeHtml(mainVenue) + '</div>' +
+          '<div class="current-main-date">' + escapeHtml(dateLabel) + '</div>' +
+        '</div>' +
+        '<div class="current-main-status"><span class="current-today-badge">本日</span><strong>' + escapeHtml(mainStatus) + '</strong></div>' +
+      '</article>' +
+      '<section class="current-section">' +
+        '<h2 class="current-section-title">♛ 本日の予想レース</h2>' +
+        '<div class="current-race-list">' + makeCurrentRaceCards(mainSchedule, mainPredictions, today) + '</div>' +
+      '</section>' +
+      '<section class="current-section current-featured-section">' +
+        '<h2 class="current-section-title">♛ 注目選手（' + (featuredMarkup.match(/current-featured-row/g) || []).length + '名）</h2>' +
+        '<div class="current-featured-list">' + featuredMarkup + '</div>' +
+      '</section>' +
+      '<button class="current-main-all" type="button" onclick="openScheduleDetail(\'' + escapeJs(mainSchedule.id) + '\')">' + escapeHtml(mainVenue) + 'の予想をすべて見る ›</button>' +
+      (otherMarkup ? '<section class="current-other-section"><h2 class="current-other-heading">ほかの開催情報</h2>' + otherMarkup + '</section>' : '');
+  }
 
+  document.querySelector(".app").style.display = "none";
+  document.getElementById("schedulePage").classList.remove("active");
+  document.getElementById("detailPage").classList.remove("active");
+  const predictionDetailPage = document.getElementById("predictionDetailPage");
+  if (predictionDetailPage) predictionDetailPage.classList.remove("active");
+  page.classList.add("active");
+  window.scrollTo(0, 0);
+}
 
-      renderFeaturedRiders(
-        currentSchedule.id
-      );
+function openCurrent() {
+  window.predictionEntrySource = 'current';
+  const today = getTodayInJapan();
 
-
-      renderDailyPredictions(
-        currentSchedule
-      );
-
-
-      window.scrollTo(0, 0);
-
-
-      console.log(
-        "★ 現在開催中の情報表示完了"
-      );
-
-
+  function showCurrentSchedules() {
+    try {
+      const activeSchedules = (window.scheduleData || []).filter(function(schedule) {
+        return today >= schedule.startDate && today <= schedule.endDate;
+      });
+      renderCurrentOverview(activeSchedules);
+      console.log("★ 現在開催中の開催数:", activeSchedules.length);
     } catch (error) {
-
-      console.error(
-        "openCurrent error:",
-        error
-      );
-
-      alert(
-        "現在開催中の情報を取得できませんでした。"
-      );
-
+      console.error("openCurrent error:", error);
+      alert("現在開催中の情報を取得できませんでした。");
     }
-
   }
 
-
-  // すでにデータ取得済みなら
-  // そのまま表示
   if (window.appDataReady === true) {
-
-    showCurrentSchedule();
-
+    showCurrentSchedules();
     return;
-
   }
 
-
-  // まだ取得できていない場合
-  // GAS_APP_DATAを待つ
-
-  const handleAppDataReady =
-    function() {
-
-      showCurrentSchedule();
-
-    };
-
-
-  window.addEventListener(
-    "appDataReady",
-    handleAppDataReady,
-    {
-      once: true
-    }
-  );
-
-
-  // データ取得開始
+  window.addEventListener("appDataReady", showCurrentSchedules, { once: true });
   loadAppData();
-
 }
 
 
