@@ -2272,7 +2272,7 @@
 .current-other-event:nth-of-type(2n) .current-race-number { background: #199a3c; }
 .current-other-body .current-race-open { color: #0879d7; }
 .current-other-event:nth-of-type(2n) .current-race-open { color: #16823a; }
-.current-other-all { min-height: 42px; margin-top: 10px; border-color: #7ab5e7; color: #0755aa; font-size: 13px; }
+.current-other-all { min-height: 48px; margin-top: 16px; border-color: #7ab5e7; color: #0755aa; font-size: 15px; }
 .current-back-button { display: block; width: calc(100% - 32px); min-height: 54px; margin: 24px 16px 28px; border: 2px solid #e50063; border-radius: 17px; background: #ffffff; color: #d9005e; font-size: 17px; font-weight: 900; cursor: pointer; }
 @media (max-width: 380px) {
   .current-page-title { font-size: 18px; }
@@ -2601,6 +2601,16 @@
 
 
     <button
+      id="detailReturnCurrentButton"
+      class="detail-back-button"
+      type="button"
+      onclick="backToCurrentPage()"
+      style="display:none;"
+    >
+      ← 本日開催中のガールズケイリンに戻る
+    </button>
+
+    <button
       class="detail-back-button"
       type="button"
       onclick="backToTop()"
@@ -2653,6 +2663,16 @@
     </div>
 
   </main>
+
+  <button
+    id="predictionDetailReturnCurrentButton"
+    class="prediction-detail-back-button"
+    type="button"
+    onclick="backToCurrentFromPredictionDetail()"
+    style="display:none;"
+  >
+    ← 本日開催中のガールズケイリンに戻る
+  </button>
 
   <button
     class="prediction-detail-back-button"
@@ -3303,8 +3323,9 @@ function openSchedule() {
     }
 
 
-  function openScheduleDetail(scheduleId) {
-  window.predictionEntrySource = 'schedule';
+  function openScheduleDetail(scheduleId, returnToCurrent) {
+  window.detailReturnToCurrent = returnToCurrent === true;
+  window.predictionEntrySource = window.detailReturnToCurrent ? 'current' : 'schedule';
 
   const schedule =
     window.scheduleData.find(function(item) {
@@ -3341,6 +3362,11 @@ document.getElementById("schedulePage")
 
 document.getElementById("detailPage")
   .classList.add("active");
+
+const returnCurrentButton = document.getElementById("detailReturnCurrentButton");
+if (returnCurrentButton) {
+  returnCurrentButton.style.display = window.detailReturnToCurrent ? "block" : "none";
+}
 
 document.querySelector(".detail-content")
   .style.display = "";
@@ -3504,6 +3530,22 @@ document.querySelector(".detail-content")
   loadAppData();
 
 }
+
+    /*
+     * 現在開催中の情報 → 開催詳細 → 現在開催中の情報
+     */
+    function backToCurrentPage() {
+      const currentPage = document.getElementById("currentPage");
+      const detailPage = document.getElementById("detailPage");
+      const predictionDetailPage = document.getElementById("predictionDetailPage");
+
+      if (detailPage) detailPage.classList.remove("active");
+      if (predictionDetailPage) predictionDetailPage.classList.remove("active");
+      if (currentPage) currentPage.classList.add("active");
+
+      window.detailReturnToCurrent = false;
+      window.scrollTo(0, 0);
+    }
 
     /*
      * 開催詳細 → トップ
@@ -4000,6 +4042,12 @@ const dateText =
         document.getElementById("detailPage").classList.remove("active");
         document.getElementById("predictionDetailPage").classList.add("active");
 
+        const returnCurrentButton = document.getElementById("predictionDetailReturnCurrentButton");
+        if (returnCurrentButton) {
+          returnCurrentButton.style.display =
+            window.predictionEntrySource === "current" ? "block" : "none";
+        }
+
         let targetDate = predictionDate || getTodayInJapan();
 
         if (targetDate < schedule.startDate) {
@@ -4370,6 +4418,23 @@ gtag('event', 'start_list_click', {
 
     }
 
+    function backToCurrentFromPredictionDetail() {
+  document
+    .getElementById("predictionDetailPage")
+    .classList.remove("active");
+
+  const currentPage = document.getElementById("currentPage");
+  if (currentPage) {
+    currentPage.classList.add("active");
+  }
+
+  document.querySelector(".app").style.display = "none";
+  document.getElementById("topPage").style.display = "none";
+
+  window.scrollTo(0, 0);
+}
+
+
     function backFromPredictionDetail() {
 
   document
@@ -4632,7 +4697,7 @@ function renderCurrentOverview(activeSchedules) {
             '<h2 class="current-section-title">♛ 注目選手（' + otherRiders.length + '名）</h2>' +
             '<div class="current-featured-list">' + otherFeaturedMarkup + '</div>' +
           '</section>' +
-          '<button class="current-other-all" type="button" onclick="openScheduleDetail(\'' + escapeJs(schedule.id) + '\')">' + escapeHtml(venue) + 'の予想をすべて見る ›</button>' +
+          '<button class="current-other-all" type="button" onclick="openScheduleDetail(\'' + escapeJs(schedule.id) + '\', true)">' + escapeHtml(venue) + 'の予想をすべて見る ›</button>' +
         '</div>' +
       '</details>';
     }).join("");
@@ -4654,7 +4719,7 @@ function renderCurrentOverview(activeSchedules) {
         '<h2 class="current-section-title">♛ 注目選手（' + (featuredMarkup.match(/current-featured-row/g) || []).length + '名）</h2>' +
         '<div class="current-featured-list">' + featuredMarkup + '</div>' +
       '</section>' +
-      '<button class="current-main-all" type="button" onclick="openScheduleDetail(\'' + escapeJs(mainSchedule.id) + '\')">' + escapeHtml(mainVenue) + 'の予想をすべて見る ›</button>' +
+      '<button class="current-main-all" type="button" onclick="openScheduleDetail(\'' + escapeJs(mainSchedule.id) + '\', true)">' + escapeHtml(mainVenue) + 'の予想をすべて見る ›</button>' +
       (otherMarkup ? '<section class="current-other-section"><h2 class="current-other-heading">ほかの開催情報</h2>' + otherMarkup + '</section>' : '');
   }
 
