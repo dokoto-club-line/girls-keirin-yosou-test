@@ -2265,6 +2265,8 @@
 .current-other-event:nth-of-type(2n) .current-accordion-arrow { color: #16823a; }
 .current-other-event[open] .current-accordion-arrow { transform: rotate(180deg); }
 .current-other-body { padding: 0 12px 12px; }
+.current-other-body .current-featured-section { margin-top: 8px; }
+.current-other-body .current-section-title { margin-bottom: 8px; font-size: 14px; }
 .current-other-body .current-race-card { background: rgba(255,255,255,.8); }
 .current-other-body .current-race-number { background: #1682d5; }
 .current-other-event:nth-of-type(2n) .current-race-number { background: #199a3c; }
@@ -4596,11 +4598,22 @@ function renderCurrentOverview(activeSchedules) {
     const otherMarkup = otherSchedules.map(function(schedule, index) {
       const venue = schedule.venueText || schedule.venue || "開催場";
       const predictions = getCurrentPredictionsForSchedule(schedule, today);
-      const raceSummary = predictions.length
-        ? predictions.map(function(item) { return escapeHtml(item.raceNumber ?? item.raceNo ?? item.race ?? "") + "R"; }).join("・")
-        : "予想公開前";
       const otherStatus = getCurrentScheduleStatus(schedule, today);
       const grade = schedule.grade || "";
+      const scheduleId = String(schedule.id || "").trim().padStart(3, "0");
+      const otherRiders = (window.featuredRidersData || []).filter(function(rider) {
+        return String(rider.scheduleId || "").trim().padStart(3, "0") === scheduleId;
+      });
+      const otherFeaturedMarkup = otherRiders.length
+        ? otherRiders.map(function(rider) {
+            const riderName = rider.riderName || rider.name || "";
+            const comment = rider.comment || "";
+            return '<div class="current-featured-row">' +
+              '<div class="current-featured-name">' + escapeHtml(riderName) + '</div>' +
+              '<div class="current-featured-comment" title="' + escapeHtml(comment) + '">' + escapeHtml(comment) + '</div>' +
+            '</div>';
+          }).join("")
+        : '<div class="current-featured-empty">現在、注目選手の情報はありません。</div>';
       return '<details class="current-other-event" data-event-index="' + index + '">' +
         '<summary class="current-other-summary">' +
           '<div class="current-other-topline">' +
@@ -4610,12 +4623,15 @@ function renderCurrentOverview(activeSchedules) {
           '<div class="current-other-bottomline">' +
             '<span class="current-today-badge">本日</span>' +
             '<span class="current-other-status">' + escapeHtml(otherStatus) + '</span>' +
-            '<span class="current-other-races"><small>予想対象レース</small><strong>' + raceSummary + '</strong></span>' +
+            (predictions.length ? '<span class="current-published-label">予想公開中</span>' : '') +
             '<span class="current-accordion-arrow" aria-hidden="true">⌄</span>' +
           '</div>' +
         '</summary>' +
         '<div class="current-other-body">' +
-          makeCurrentRaceCards(schedule, predictions, today) +
+          '<section class="current-section current-featured-section">' +
+            '<h2 class="current-section-title">♛ 注目選手（' + otherRiders.length + '名）</h2>' +
+            '<div class="current-featured-list">' + otherFeaturedMarkup + '</div>' +
+          '</section>' +
           '<button class="current-other-all" type="button" onclick="openScheduleDetail(\'' + escapeJs(schedule.id) + '\')">' + escapeHtml(venue) + 'の予想をすべて見る ›</button>' +
         '</div>' +
       '</details>';
